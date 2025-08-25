@@ -1,0 +1,29 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout your repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # SSH and deploy to EC2
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/simple-app || exit
+            git pull origin main
+            npm install
+            pm2 restart hello-app || pm2 start app.js --name hello-app
